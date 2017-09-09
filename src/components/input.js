@@ -8,9 +8,9 @@ class Input extends Component {
             name,
             value,
             key } = this.props;
-
+        
         return (
-            <input onChange={updateLocationValue.bind(this, key)} name={name} defaultValue={value}/>
+            <input onChange={() => this.updateLocationValue(key)} name={name} defaultValue={value}/>
         )
     }
 }
