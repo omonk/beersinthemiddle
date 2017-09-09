@@ -3,10 +3,14 @@ import React, { Component } from 'react';
 class Input extends Component {
     
     render() {
-        const { updateLocationValue, name, value } = this.props;
+        const { 
+            updateLocationValue,
+            name,
+            value,
+            key } = this.props;
 
         return (
-            <input onChange={updateLocationValue.bind(this, value)} name={name} value={value}/>
+            <input onChange={updateLocationValue.bind(this, key)} name={name} defaultValue={value}/>
         )
     }
 }

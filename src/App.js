@@ -43,9 +43,9 @@ class App extends Component {
     console.log('updatedMap');
   }
 
-  updateLocationValue(e) {
-
-    console.log(e);
+  updateLocationValue(key, event) {
+    this.state.locations.filter(location => location.key === key).value = event.target.value;
+    this.setState(this.state);
   }
 
   render() {
@@ -54,15 +54,17 @@ class App extends Component {
         <div className="fl w-100">
           <h2>{config.site_title}</h2>
         </div>
-        {this.state.locations.map((location, p)=>(
-          <InputWrap 
-            removeLocation={this.removeLocation.bind(this, p)} 
-            updateLocationValue={this.updateLocationValue.bind(this)}
-            number={p}
-            name={location.name} 
-            location={location}
-            defaultValue={location.value}/>
-        ))}
+        <form action={this.sendLocations.bind(this)}>
+          {this.state.locations.map((location, i)=>(
+            <InputWrap 
+              removeLocation={this.removeLocation.bind(this, i)} 
+              updateLocationValue={this.updateLocationValue.bind(this)}
+              key={location.key}
+              name={location.name} 
+              index={i}
+              defaultValue={location.value}/>
+          ))}
+        </form>
         <button onClick={ this.addLocation.bind(this) }>Add new location</button>
         <button onClick={ this.sendLocations.bind(this)}>Send Locations</button>
       </div>
