@@ -48,12 +48,11 @@ class App extends Component {
     console.log('updatedMap');
   }
 
-  updateLocationValue = (id) => (event) => {
+  handleLocationValueChange = (id) => (event) => {
+    console.log('123123');
     return this.setState({
       locations: this.state.locations.map(location => {
-        console.log(id, location.id);
         if (location.id !== id) return location;
-        console.log('got here');
         location.value = event.target.value;
         return location;
       })
@@ -69,8 +68,8 @@ class App extends Component {
         <form action={this.sendLocations.bind(this)}>
           {this.state.locations.map((location, i)=>(
             <InputWrap 
+              onChange={this.handleLocationValueChange(location.id)}
               removeLocation={this.removeLocation}
-              updateLocationValue={this.updateLocationValue}
               id={location.id}
               key={location.key}
               name={location.name} 
