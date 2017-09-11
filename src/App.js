@@ -10,6 +10,7 @@ class App extends Component {
       locations: [{
         name: 'Location 1',
         value: 'London',
+        id: Math.random() * 100,
         key: Math.random() * 100,
       }]
     }
@@ -19,10 +20,10 @@ class App extends Component {
     this.state.locations.push({
       name: `Location ${this.state.locations.length + 1}`,
       value: '',
+      id: Math.random() * 100,
       key: Math.random() * 100,
     });
-
-    this.setState(this.state);
+    return this.setState(this.state);
   }
 
   removeLocation = (i) => {
@@ -34,8 +35,6 @@ class App extends Component {
     const locationQueries = this.state.locations.map((location) => {
       return `${location.name}:${location.value}`
     });
-
-    console.log(locationQueries);
     
     const url = `${config.hostname}/api/location-request?${locationQueries}`
     fetch(url, {
@@ -49,9 +48,16 @@ class App extends Component {
     console.log('updatedMap');
   }
 
-  updateLocationValue = (key, event) => {
-    this.state.locations.filter(location => location.key === key).value = event.target.value;
-    this.setState(this.state);
+  updateLocationValue = (id) => (event) => {
+    return this.setState({
+      locations: this.state.locations.map(location => {
+        console.log(id, location.id);
+        if (location.id !== id) return location;
+        console.log('got here');
+        location.value = event.target.value;
+        return location;
+      })
+    })
   }
 
   render() {
@@ -63,16 +69,17 @@ class App extends Component {
         <form action={this.sendLocations.bind(this)}>
           {this.state.locations.map((location, i)=>(
             <InputWrap 
-              removeLocation={this.removeLocation(i)} 
-              updateLocationValue={this.updateLocationValue(location.key)}
+              removeLocation={this.removeLocation}
+              updateLocationValue={this.updateLocationValue}
+              id={location.id}
               key={location.key}
               name={location.name} 
               index={i}
               defaultValue={location.value}/>
           ))}
         </form>
-        <button onClick={ this.addLocation() }>Add new location</button>
-        <button onClick={ this.sendLocations()}>Send Locations</button>
+        <button onClick={ this.addLocation }>Add new location</button>
+        <button onClick={ this.sendLocations}>Send Locations</button>
       </div>
     );
   }

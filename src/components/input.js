@@ -3,14 +3,14 @@ import React, { Component } from 'react';
 class Input extends Component {
     
     render() {
+        console.log(this.props);
         const { 
             updateLocationValue,
             name,
             value,
-            key } = this.props;
-        
+            id } = this.props;
         return (
-            <input onChange={() => this.updateLocationValue(key)} name={name} defaultValue={value}/>
+            <input onChange={updateLocationValue(id)} name={name} defaultValue={value}/>
         )
     }
 }
