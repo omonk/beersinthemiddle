@@ -1,109 +1,107 @@
 import React, { Component } from 'react';
 import { generate } from 'shortid';
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-
+import getLongLatMidPoint from './utils/getLongLatMidPoint';
+import Map from './components/Map';
 import config from './config.json';
 
-function decimelToRadian(degrees) {
-  return degrees * Math.PI / 180;
-};
-
-function radianToDecimel(radians) {
-  return radians * 180 / Math.PI;
-}
-
-function getAverage(arr, key) {
-  return arr.reduce((acc, current) => acc + current[key], 0) / arr.length;
-};
+// Styles
+import './css/Map.css';
 
 class App extends Component {
   constructor() {
-    super()
+    super();
 
     this.state = {
-      locations: [],
       inputValue: '',
-      mapPointCenter: null
+      locations: [],
+      locationsMidPoint: {
+        lat: 0,
+        lng: 0,
+        label: 'center',
+      },
+      locationsMidPointDefined: false,
+      mapCenter: {
+        lat: 0,
+        lng: 0,
+      },
+    };
+
+    this.onChange = address => this.setState({ inputValue: address });
+  }
+
+  componentWillMount() {
+    if ('geolocation' in navigator) {
+      this.setState({ mapCenterLoading: true });
+      navigator.geolocation.getCurrentPosition(
+        this.getCurrentPositionSuccess,
+        this.getCurrentPositionError,
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        },
+      );
+    } else {
+      /* geolocation IS NOT available */
     }
-
-    this.onChange = (address) => this.setState({inputValue: address})
   }
 
-  addLocation = () => {
-    this.state.locations.push({
-      name: `Location ${this.state.locations.length + 1}`,
-      value: '',
-      id: Math.random() * 100,
-      key: generate(),
+  getCurrentPositionSuccess = (pos) => {
+    const crds = pos.coords;
+    console.log(crds);
+    console.log('mapCenterLoading: false');
+    this.setState({
+      mapCenter: {
+        lat: crds.latitude,
+        lng: crds.longitude,
+      },
+      mapCenterLoading: false,
     });
-    return this.setState(this.state);
   }
 
-  removeLocation = (i) => {
-    this.state.locations.slice(i, 0);
-    this.setState(this.state);
-  }
-
-  sendLocations = () => {
-    const locationQueries = this.state.locations.map((location) => {
-      return `${location.name}:${location.value}`
+  getCurrentPositionError = (err) => {
+    this.setState({
+      geoLocationError: true,
+      mapCenterLoading: false,
     });
-    
-    const url = `${config.hostname}/api/location-request?${locationQueries}`
-    fetch(url, {
-      mode: 'no-cors'
-    })
-      .catch(err => console.log('there was an error...', err))
-      // .then(this.updateMap)
   }
+
+  // removeLocation = (i) => {
+  //   this.state.locations.slice(i, 0);
+  //   this.setState(this.state);
+  // }
 
   getLocationAddress = location =>
     geocodeByAddress(location)
       .then(res => getLatLng(res[0]))
       .then(res => res);
 
-  // http://geomidpoint.com/calculation.html
-  getAverageLongLat = locations => {
-    const locationsLength = locations.length;
-
-    const latLongRadians = locations.map(location => ({
-      lat: decimelToRadian(location.lat),
-      lng: decimelToRadian(location.lng),
-    }));
-
-    const latLongCatesian = latLongRadians.map(radian => ({
-      x: Math.cos(radian.lat) * Math.cos(radian.lng),
-      y: Math.cos(radian.lat) * Math.sin(radian.lng),
-      z: Math.sin(radian.lat)
-    }));
-
-    const radianAv = {
-      x: getAverage(latLongCatesian, 'x'),
-      y: getAverage(latLongCatesian, 'y'),
-      z: getAverage(latLongCatesian, 'z'),
-    }
-    
-    const long = Math.atan2(radianAv.y, radianAv.x);
-    const hyp = Math.sqrt((radianAv.x * radianAv.x) + (radianAv.y * radianAv.y));
-    const lat = Math.atan2(radianAv.z, hyp);
-
-    const midPointsToDecimels = {
-      lat: radianToDecimel(lat),
-      long: radianToDecimel(long)
-    }
-
-    return midPointsToDecimels;
-  }
-
   submitFrom = (event) => {
     event.preventDefault();
 
     Promise.all(
-      this.state.locations.map(location => this.getLocationAddress(location))
-    ).then(res => {
-      const averageLongLat = this.getAverageLongLat(res);
-      this.setState({mapPointCenter: averageLongLat});
+      this.state.locations.map(location => this.getLocationAddress(location)),
+    ).then((res) => {
+      const averageLongLat = getLongLatMidPoint(res);
+      this.setState({
+        locationsMidPoint: {
+          ...averageLongLat,
+          label: 'you',
+        },
+      });
     });
+  }
+
+  sendLocations = () => {
+    const locationQueries = this.state.locations.map(location => `${location.name}:${location.value}`);
+
+    const url = `${config.hostname}/api/location-request?${locationQueries}`;
+    fetch(url, {
+      mode: 'no-cors',
+    })
+      .catch(err => console.log('there was an error...', err));
+    // .then(this.updateMap)
   }
 
   handleSelect = (address) => {
@@ -127,14 +125,29 @@ class App extends Component {
           <h2>{config.site_title}</h2>
         </div>
         <form onSubmit={this.submitFrom.bind(this)}>
-          <PlacesAutocomplete inputProps={PlacesInputProps} onSelect={this.handleSelect}/>
+          <PlacesAutocomplete inputProps={PlacesInputProps} onSelect={this.handleSelect} />
           <ul>
-          {this.state.locations.length > 0 && this.state.locations.map(location => (
-            <li key={generate()}>{location}</li>
+            {this.state.locations.length > 0 && this.state.locations.map(location => (
+              <li key={generate()}>{location}</li>
           ))}
           </ul>
           <button type="submit">Send Locations</button>
         </form>
+        <div className="map__wrapper--outer">
+          {this.state.mapCenterLoading && (
+            <div className="map__loading">
+              <p>Map center loading...</p>
+            </div>
+          )}
+          <div className="map__wrapper--inner">
+            <Map
+              zoom={10}
+              center={this.state.mapCenter}
+              locations={this.state.locations}
+              locationsMidPoint={this.state.locationsMidPoint}
+            />
+          </div>
+        </div>
       </div>
     );
   }
