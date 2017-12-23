@@ -3,13 +3,15 @@ import GoogleMapReact from 'google-map-react';
 import PropTypes from 'prop-types';
 import { generate } from 'shortid';
 
-const LocationMarker = ({ text }) => <div>{text}</div>;
+import locationsMetaData from '../utils/locationPreSelect.json';
+import LocationMarker from '../assets/locationMarker';
+
 const MidPointMarker = ({ text }) => <div>{text}</div>;
 
 class Map extends Component {
-  constructor() {
-    super();
-  }
+//   constructor() {
+//     super();
+//   }
 
   componentWillMount() {
     // if ('geolocation' in navigator) {
@@ -31,6 +33,10 @@ class Map extends Component {
       <GoogleMapReact
         center={center}
         defaultZoom={zoom}
+        bootstrapURLKeys={{
+            key: 'AIzaSyC4yjCTPVzFZx0Fj0P9mSei1btoPQexc0s',
+            language: 'en',
+          }}
       >
         {locationsMidPoint && (
         <MidPointMarker
@@ -40,12 +46,13 @@ class Map extends Component {
         />
         )}
 
-        {locations.length > 0 && locations.map(location => (
+        {locations.length > 0 && locations.map((location, i) => (
           <LocationMarker
             key={generate()}
             lat={location.lat}
             lng={location.lng}
-            text={location.label}
+            text=""
+            color={locationsMetaData.locations[i].color}
           />
         ))}
       </GoogleMapReact>

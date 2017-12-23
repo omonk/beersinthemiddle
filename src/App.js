@@ -4,9 +4,11 @@ import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-au
 import getLongLatMidPoint from './utils/getLongLatMidPoint';
 import Map from './components/Map';
 import config from './config.json';
+import locationsMetaData from './utils/locationPreSelect.json';
 
 // Styles
 import './css/Map.css';
+import './css/LocationsList.css';
 
 class App extends Component {
   constructor() {
@@ -42,15 +44,12 @@ class App extends Component {
           maximumAge: 0,
         },
       );
-    } else {
-      /* geolocation IS NOT available */
     }
   }
 
   getCurrentPositionSuccess = (pos) => {
     const crds = pos.coords;
-    console.log(crds);
-    console.log('mapCenterLoading: false');
+
     this.setState({
       mapCenter: {
         lat: crds.latitude,
@@ -61,36 +60,51 @@ class App extends Component {
   }
 
   getCurrentPositionError = (err) => {
+    console.log(err);
     this.setState({
       geoLocationError: true,
       mapCenterLoading: false,
     });
   }
 
-  // removeLocation = (i) => {
-  //   this.state.locations.slice(i, 0);
-  //   this.setState(this.state);
-  // }
-
-  getLocationAddress = location =>
+  getLocationAddress = location => new Promise((resolve, reject) => {
     geocodeByAddress(location)
       .then(res => getLatLng(res[0]))
-      .then(res => res);
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  })
 
   submitFrom = (event) => {
     event.preventDefault();
-
-    Promise.all(
-      this.state.locations.map(location => this.getLocationAddress(location)),
-    ).then((res) => {
-      const averageLongLat = getLongLatMidPoint(res);
-      this.setState({
-        locationsMidPoint: {
-          ...averageLongLat,
-          label: 'you',
-        },
-      });
+    this.setState({
+      apiCallLoading: true,
     });
+    const averageLongLat = getLongLatMidPoint(this.state.locations);
+    const options = {
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    fetch(`/api/foursquare?ll=${averageLongLat}`, options)
+      .then((res) => {
+        console.log(res);
+        this.setState({
+          recommendations: res,
+          locationsMidPoint: {
+            ...averageLongLat,
+          },
+          apiCallLoading: false,
+        });
+      });
+
+    // });
+  }
+
+  removeLocation = (i) => {
+    this.state.locations.slice(i, 0);
+    this.setState(this.state);
   }
 
   sendLocations = () => {
@@ -106,10 +120,27 @@ class App extends Component {
 
   handleSelect = (address) => {
     if (!this.state.locations.includes(address)) {
-      return this.setState({
-        locations: [...this.state.locations, address],
-        inputValue: '',
-      });
+      geocodeByAddress(address)
+        .then(res => getLatLng(res[0]))
+        .then((res) => {
+          const newLocation = {
+            lat: res.lat,
+            lng: res.lng,
+            address,
+          };
+
+          this.setState({
+            locations: [
+              ...this.state.locations,
+              newLocation,
+            ],
+            mapCenter: {
+              lat: newLocation.lat,
+              lng: newLocation.lng,
+            },
+            inputValue: '',
+          });
+        });
     }
   }
 
@@ -119,20 +150,37 @@ class App extends Component {
       onChange: this.onChange,
     };
 
+    const PlacesStyles = {
+      root: {
+        zIndex: 100,
+      },
+    };
+
     return (
       <div className="ph2 ph7-ns cf sans-serif">
         <div className="fl w-100">
           <h2>{config.site_title}</h2>
         </div>
         <form onSubmit={this.submitFrom.bind(this)}>
-          <PlacesAutocomplete inputProps={PlacesInputProps} onSelect={this.handleSelect} />
-          <ul>
-            {this.state.locations.length > 0 && this.state.locations.map(location => (
-              <li key={generate()}>{location}</li>
-          ))}
-          </ul>
+          <PlacesAutocomplete
+            inputProps={PlacesInputProps}
+            onSelect={this.handleSelect}
+            styles={PlacesStyles}
+          />
           <button type="submit">Send Locations</button>
         </form>
+        <ul className="location__list">
+
+          {this.state.locations.length > 0 && this.state.locations.map((location, i) => (
+            <li
+              className="location__list-item"
+              style={{ backgroundColor: locationsMetaData.locations[i].color }}
+              key={generate()}
+            >
+              <p>{location.address}</p>
+            </li>
+            ))}
+        </ul>
         <div className="map__wrapper--outer">
           {this.state.mapCenterLoading && (
             <div className="map__loading">
@@ -141,7 +189,7 @@ class App extends Component {
           )}
           <div className="map__wrapper--inner">
             <Map
-              zoom={10}
+              zoom={15}
               center={this.state.mapCenter}
               locations={this.state.locations}
               locationsMidPoint={this.state.locationsMidPoint}
