@@ -6,6 +6,7 @@ import { generate } from 'shortid';
 import locationsMetaData from '../utils/locationPreSelect.json';
 import LocationMarker from '../assets/locationMarker';
 import LocationMidPointMarker from '../assets/locationMarker';
+import RecommendationsMarker from '../assets/recommendationsMarker';
 
 class Map extends Component {
 //   constructor() {
@@ -26,6 +27,7 @@ class Map extends Component {
       zoom,
       locations,
       locationsMidPoint,
+      recommendations,
     } = this.props;
 
     return (
@@ -52,6 +54,15 @@ class Map extends Component {
             lng={location.lng}
             text=""
             color={locationsMetaData.locations[i].color}
+          />
+        ))}
+
+        {recommendations.length > 0 && recommendations.map(recommendation => (
+          <RecommendationsMarker
+            key={generate()}
+            lat={recommendation.location.lat}
+            lng={recommendation.location.lng}
+            text=""
           />
         ))}
       </GoogleMapReact>

@@ -10,6 +10,19 @@ import locationsMetaData from './utils/locationPreSelect.json';
 import './css/Map.css';
 import './css/LocationsList.css';
 
+const Form = ({
+  submitForm, placesStyles, placesInputProps, handleSelect,
+}) => (
+  <form onSubmit={submitForm}>
+    <PlacesAutocomplete
+      inputProps={placesInputProps}
+      onSelect={handleSelect}
+      styles={placesStyles}
+    />
+    <button type="submit">Send Locations</button>
+  </form>
+);
+
 class App extends Component {
   constructor() {
     super();
@@ -27,6 +40,7 @@ class App extends Component {
         lat: 0,
         lng: 0,
       },
+      recommendations: [],
     };
 
     this.onChange = address => this.setState({ inputValue: address });
@@ -67,12 +81,9 @@ class App extends Component {
     });
   }
 
-  getLocationAddress = location => new Promise((resolve, reject) => {
+  getLocationAddress = location =>
     geocodeByAddress(location)
       .then(res => getLatLng(res[0]))
-      .then(res => resolve(res))
-      .catch(err => reject(err));
-  })
 
   submitFrom = (event) => {
     event.preventDefault();
@@ -80,7 +91,6 @@ class App extends Component {
       apiCallLoading: true,
     });
     const averageLongLat = getLongLatMidPoint(this.state.locations);
-    console.log({ averageLongLat });
     const options = {
       method: 'get',
       headers: {
@@ -89,35 +99,23 @@ class App extends Component {
     };
 
     fetch(`/api/foursquare?ll=${averageLongLat.lat},${averageLongLat.lng}`, options)
+      .then(res => res.json())
       .then((res) => {
         console.log(res);
         this.setState({
-          recommendations: res,
+          recommendations: res.response,
           locationsMidPoint: {
             ...averageLongLat,
           },
           apiCallLoading: false,
         });
       });
-
-    // });
   }
 
   removeLocation = (i) => {
     this.state.locations.slice(i, 0);
     this.setState(this.state);
   }
-
-  // sendLocations = () => {
-  //   const locationQueries = this.state.locations.map(location => `${location.name}:${location.value}`);
-
-  //   const url = `${config.hostname}/api/location-request?${locationQueries}`;
-  //   fetch(url, {
-  //     mode: 'no-cors',
-  //   })
-  //     .catch(err => console.log('there was an error...', err));
-  //   // .then(this.updateMap)
-  // }
 
   handleSelect = (address) => {
     if (!this.state.locations.includes(address)) {
@@ -146,32 +144,25 @@ class App extends Component {
   }
 
   render() {
-    const PlacesInputProps = {
-      value: this.state.inputValue,
-      onChange: this.onChange,
-    };
-
-    const PlacesStyles = {
-      root: {
-        zIndex: 100,
-      },
-    };
-
     return (
       <div className="ph2 ph7-ns cf sans-serif">
         <div className="fl w-100">
           <h2>{config.site_title}</h2>
         </div>
-        <form onSubmit={this.submitFrom.bind(this)}>
-          <PlacesAutocomplete
-            inputProps={PlacesInputProps}
-            onSelect={this.handleSelect}
-            styles={PlacesStyles}
-          />
-          <button type="submit">Send Locations</button>
-        </form>
+        <Form
+          submitForm={this.submitFrom}
+          handleSelect={this.handleSelect}
+          placesInputProps={{
+            value: this.state.inputValue,
+            onChange: this.onChange,
+          }}
+          placesStyles={{
+            root: {
+              zIndex: 100,
+            },
+          }}
+        />
         <ul className="location__list">
-
           {this.state.locations.length > 0 && this.state.locations.map((location, i) => (
             <li
               className="location__list-item"
@@ -194,9 +185,18 @@ class App extends Component {
               center={this.state.mapCenter}
               locations={this.state.locations}
               locationsMidPoint={this.state.locationsMidPoint}
+              recommendations={this.state.recommendations}
             />
           </div>
         </div>
+        <ul>
+          {this.state.recommendations.length > 0 &&
+            this.state.recommendations.map(recommendation => (
+              <li key={generate()}>
+                <p>{recommendation.title}</p>
+              </li>
+          ))}
+        </ul>
       </div>
     );
   }
