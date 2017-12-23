@@ -5,8 +5,7 @@ import { generate } from 'shortid';
 
 import locationsMetaData from '../utils/locationPreSelect.json';
 import LocationMarker from '../assets/locationMarker';
-
-const MidPointMarker = ({ text }) => <div>{text}</div>;
+import LocationMidPointMarker from '../assets/locationMarker';
 
 class Map extends Component {
 //   constructor() {
@@ -39,7 +38,7 @@ class Map extends Component {
           }}
       >
         {locationsMidPoint && (
-        <MidPointMarker
+        <LocationMidPointMarker
           lat={locationsMidPoint.lat}
           lng={locationsMidPoint.lng}
           text={locationsMidPoint.label}

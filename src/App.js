@@ -80,6 +80,7 @@ class App extends Component {
       apiCallLoading: true,
     });
     const averageLongLat = getLongLatMidPoint(this.state.locations);
+    console.log({ averageLongLat });
     const options = {
       method: 'get',
       headers: {
@@ -87,7 +88,7 @@ class App extends Component {
       },
     };
 
-    fetch(`/api/foursquare?ll=${averageLongLat}`, options)
+    fetch(`/api/foursquare?ll=${averageLongLat.lat},${averageLongLat.lng}`, options)
       .then((res) => {
         console.log(res);
         this.setState({
@@ -107,16 +108,16 @@ class App extends Component {
     this.setState(this.state);
   }
 
-  sendLocations = () => {
-    const locationQueries = this.state.locations.map(location => `${location.name}:${location.value}`);
+  // sendLocations = () => {
+  //   const locationQueries = this.state.locations.map(location => `${location.name}:${location.value}`);
 
-    const url = `${config.hostname}/api/location-request?${locationQueries}`;
-    fetch(url, {
-      mode: 'no-cors',
-    })
-      .catch(err => console.log('there was an error...', err));
-    // .then(this.updateMap)
-  }
+  //   const url = `${config.hostname}/api/location-request?${locationQueries}`;
+  //   fetch(url, {
+  //     mode: 'no-cors',
+  //   })
+  //     .catch(err => console.log('there was an error...', err));
+  //   // .then(this.updateMap)
+  // }
 
   handleSelect = (address) => {
     if (!this.state.locations.includes(address)) {
@@ -189,7 +190,7 @@ class App extends Component {
           )}
           <div className="map__wrapper--inner">
             <Map
-              zoom={15}
+              zoom={10}
               center={this.state.mapCenter}
               locations={this.state.locations}
               locationsMidPoint={this.state.locationsMidPoint}
