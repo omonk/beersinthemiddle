@@ -8,7 +8,6 @@ const getFourSquareRecommendations = require('./services/get-four-square-recomme
 
 app.use(bodyParser.json());
 
-// app.get('/api/location/midpoint', getLocationsMidPoint);
 app.get('/api/foursquare', getFourSquareRecommendations);
 
 app.listen(9000, () => {
