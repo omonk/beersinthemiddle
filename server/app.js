@@ -1,13 +1,16 @@
-const express = require("express");
+require('dotenv').config();
+const express = require('express');
+
 const app = express();
 
-const bodyParser = require("body-parser");
-const locationQueries = require("./services/location-queries.service");
+const bodyParser = require('body-parser');
+const getFourSquareRecommendations = require('./services/get-four-square-recommendations');
+
 app.use(bodyParser.json());
 
-app.get("/api/location-request", locationQueries);
+// app.get('/api/location/midpoint', getLocationsMidPoint);
+app.get('/api/foursquare', getFourSquareRecommendations);
 
-
-app.listen(9000, function () {
-    console.log("BITM Server running on http://localhost:9000");
+app.listen(9000, () => {
+  console.log('BITM Server running on http://localhost:9000');
 });
