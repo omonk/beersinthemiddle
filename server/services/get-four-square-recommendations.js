@@ -46,6 +46,9 @@ module.exports = (req, res) => {
   return getFourSquareRecommendations(ll)
     .then(formatFourSquareResponse)
     .then(response => res.send({ response }))
-    .catch(err => res.status(500).json({ error: err.toString() }));
+    .catch((err) => {
+      console.log(`Error: ${err}`);
+      res.status(500).json({ error: err.toString() });
+    });
 };
 

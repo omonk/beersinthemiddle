@@ -1,18 +1,15 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class Input extends Component {
-    
-    render() {
-        console.log(this.props);
-        const { 
-            updateLocationValue,
-            name,
-            value,
-            id } = this.props;
-        return (
-            <input onChange={updateLocationValue(id)} name={name} defaultValue={value}/>
-        )
-    }
-}
+const Input = (props) => {
+  const {
+    updateLocationValue,
+    name,
+    value,
+    id,
+  } = props;
+  return (
+    <input onChange={updateLocationValue(id)} name={name} defaultValue={value} />
+  );
+};
 
 export default Input;

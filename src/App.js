@@ -41,6 +41,7 @@ class App extends Component {
         lng: 0,
       },
       recommendations: [],
+      noLocationsError: false,
     };
 
     this.onChange = address => this.setState({ inputValue: address });
@@ -73,8 +74,7 @@ class App extends Component {
     });
   }
 
-  getCurrentPositionError = (err) => {
-    console.log(err);
+  getCurrentPositionError = () => {
     this.setState({
       geoLocationError: true,
       mapCenterLoading: false,
@@ -98,17 +98,20 @@ class App extends Component {
       },
     };
 
-    fetch(`/api/foursquare?ll=${averageLongLat.lat},${averageLongLat.lng}`, options)
-      .then(res => res.json())
-      .then((res) => {
-        console.log(res);
-        this.setState({
-          recommendations: res.response,
-          locationsMidPoint: {
-            ...averageLongLat,
-          },
-          apiCallLoading: false,
-        });
+    (averageLongLat.lat && averageLongLat.lng) ?
+      fetch(`/api/foursquare?ll=${averageLongLat.lat},${averageLongLat.lng}`, options)
+        .then(res => res.json())
+        .then((res) => {
+          this.setState({
+            recommendations: res.response,
+            locationsMidPoint: {
+              ...averageLongLat,
+            },
+            apiCallLoading: false,
+          });
+        })
+      : this.setState({
+        noLocationsError: true,
       });
   }
 
@@ -143,6 +146,13 @@ class App extends Component {
     }
   }
 
+  hideNoLocationsError = () => {
+    this.state.noLocationsError ?
+      this.setState({
+        noLocationsError: false,
+      }) : null;
+  }
+
   render() {
     return (
       <div className="ph2 ph7-ns cf sans-serif">
@@ -162,6 +172,12 @@ class App extends Component {
             },
           }}
         />
+        {this.state.noLocationsError &&
+          <div>
+            <p>You need locations!</p>
+            <button onClick={this.hideNoLocationsError}>X</button>
+          </div>
+        }
         <ul className="location__list">
           {this.state.locations.length > 0 && this.state.locations.map((location, i) => (
             <li
@@ -171,7 +187,7 @@ class App extends Component {
             >
               <p>{location.address}</p>
             </li>
-            ))}
+          ))}
         </ul>
         <div className="map__wrapper--outer">
           {this.state.mapCenterLoading && (
@@ -190,12 +206,13 @@ class App extends Component {
           </div>
         </div>
         <ul>
-          {this.state.recommendations.length > 0 &&
+          {this.state.recommendations &&
+            this.state.recommendations.length > 0 &&
             this.state.recommendations.map(recommendation => (
               <li key={generate()}>
                 <p>{recommendation.title}</p>
               </li>
-          ))}
+            ))}
         </ul>
       </div>
     );

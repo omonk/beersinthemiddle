@@ -5,20 +5,16 @@ import { generate } from 'shortid';
 
 import locationsMetaData from '../utils/locationPreSelect.json';
 import LocationMarker from '../assets/locationMarker';
-import LocationMidPointMarker from '../assets/locationMarker';
+import LocationMidPointMarker from '../assets/locationMidPointMarker';
 import RecommendationsMarker from '../assets/recommendationsMarker';
 
 class Map extends Component {
-//   constructor() {
-//     super();
-//   }
-
   componentWillMount() {
-    // if ('geolocation' in navigator) {
-    //   /* geolocation is available */
-    // } else {
-    //   /* geolocation IS NOT available */
-    // }
+    if ('geolocation' in navigator) {
+      /* geolocation is available */
+    } else {
+      /* geolocation IS NOT available */
+    }
   }
 
   render() {
