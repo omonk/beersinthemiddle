@@ -7,8 +7,9 @@ import config from './config.json';
 import locationsMetaData from './utils/locationPreSelect.json';
 
 // Styles
-import './css/Map.css';
-import './css/LocationsList.css';
+// import './css/Map.css';
+// import './css/LocationsList.css';
+
 
 const Form = ({
   submitForm, placesStyles, placesInputProps, handleSelect,

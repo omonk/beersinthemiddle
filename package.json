@@ -25,9 +25,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "css": "tachyons src/css/app.css > src/index.css --minify",
-    "prestart": "npm run css",
-    "prebuild": "npm run css"
+    "scss:build": "node-sass src/scss/app.scss src/css/app.css --output-style compressed",
+    "scss:watch": "npm run scss:build && npm run scss:build -- -wr",
+    "prestart": "npm run scss:build",
+    "prebuild": "npm run scss:build"
   },
   "proxy": "http://localhost:9000",
   "devDependencies": {
@@ -36,6 +37,7 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.5.1",
+    "node-sass": "^4.9.2",
     "nodemon": "^1.18.2",
     "prettier-eslint": "^8.6.0"
   }
