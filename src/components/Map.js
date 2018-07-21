@@ -35,12 +35,12 @@ class Map extends Component {
             language: 'en',
           }}
       >
-        {locationsMidPoint && (
-        <LocationMidPointMarker
-          lat={locationsMidPoint.lat}
-          lng={locationsMidPoint.lng}
-          text={locationsMidPoint.label}
-        />
+        {locationsMidPoint.lat && locationsMidPoint.lng && (
+          <LocationMidPointMarker
+            lat={locationsMidPoint.lat}
+            lng={locationsMidPoint.lng}
+            text={locationsMidPoint.label}
+          />
         )}
 
         {locations.length > 0 && locations.map((location, i) => (
@@ -53,12 +53,14 @@ class Map extends Component {
           />
         ))}
 
-        {recommendations.length > 0 && recommendations.map(recommendation => (
+        {recommendations.length > 0 && recommendations.map((recommendation, index) => (
           <RecommendationsMarker
             key={generate()}
             lat={recommendation.location.lat}
             lng={recommendation.location.lng}
+            data={recommendation}
             text=""
+            index={index}
           />
         ))}
       </GoogleMapReact>

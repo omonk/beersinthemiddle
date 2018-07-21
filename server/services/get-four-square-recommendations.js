@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const { get } = require('lodash');
 
-const getParamsWithLL = ll => `?ll=${ll}&client_id=${process.env.FOURSQUARE_API_CLIENT}&client_secret=${process.env.FOURSQUARE_API_SECRET}&v=20170509&section=drinks`;
+const getParamsWithLL = ll => `?ll=${ll}&client_id=${process.env.FOURSQUARE_API_CLIENT}&client_secret=${process.env.FOURSQUARE_API_SECRET}&v=20170509&section=drinks&sortByDistance=1`;
 
 const getFourSquareRecommendations = (ll) => {
   const baseUrl = 'https://api.foursquare.com/v2/venues/explore';
@@ -18,8 +18,6 @@ const getFourSquareRecommendations = (ll) => {
 
 const formatFourSquareResponse = (data) => {
   const venues = data.response.groups[0];
-
-  console.log(JSON.stringify(venues.items[0], null, 2));
 
   return venues.items.map(item => ({
     title: get(item, 'venue.name', 'N/A'),

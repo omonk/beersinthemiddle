@@ -6,11 +6,6 @@ import Map from './components/Map';
 import config from './config.json';
 import locationsMetaData from './utils/locationPreSelect.json';
 
-// Styles
-// import './css/Map.css';
-// import './css/LocationsList.css';
-
-
 const Form = ({
   submitForm, placesStyles, placesInputProps, handleSelect,
 }) => (
@@ -92,15 +87,14 @@ class App extends Component {
       apiCallLoading: true,
     });
     const averageLongLat = getLongLatMidPoint(this.state.locations);
-    const options = {
-      method: 'get',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
 
     (averageLongLat.lat && averageLongLat.lng) ?
-      fetch(`/api/foursquare?ll=${averageLongLat.lat},${averageLongLat.lng}`, options)
+      fetch(`/api/foursquare?ll=${averageLongLat.lat},${averageLongLat.lng}`, {
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
         .then(res => res.json())
         .then((res) => {
           this.setState({
@@ -108,9 +102,11 @@ class App extends Component {
             locationsMidPoint: {
               ...averageLongLat,
             },
+            locationsMidPointDefined: true,
             apiCallLoading: false,
           });
         })
+        .catch(err => console.log(err))
       : this.setState({
         noLocationsError: true,
       });
@@ -156,40 +152,44 @@ class App extends Component {
 
   render() {
     return (
-      <div className="ph2 ph7-ns cf sans-serif">
-        <div className="fl w-100">
-          <h2>{config.site_title}</h2>
-        </div>
-        <Form
-          submitForm={this.submitFrom}
-          handleSelect={this.handleSelect}
-          placesInputProps={{
+      <div>
+        <div className="form">
+          <div>
+            <h2>{config.site_title}</h2>
+          </div>
+          <Form
+            submitForm={this.submitFrom}
+            handleSelect={this.handleSelect}
+            placesInputProps={{
             value: this.state.inputValue,
             onChange: this.onChange,
           }}
-          placesStyles={{
+            placesStyles={{
             root: {
               zIndex: 100,
             },
           }}
-        />
-        {this.state.noLocationsError &&
-          <div>
-            <p>You need locations!</p>
-            <button onClick={this.hideNoLocationsError}>X</button>
-          </div>
+          />
+          {this.state.noLocationsError &&
+            <div>
+              <p>You need locations!</p>
+              <button onClick={this.hideNoLocationsError}>X</button>
+            </div>
+          }
+        </div>
+        {this.state.locations.length > 0 &&
+          <ul className="location__list">
+            {this.state.locations.map((location, i) => (
+              <li
+                className="location__list-item"
+                style={{ backgroundColor: locationsMetaData.locations[i].color }}
+                key={generate()}
+              >
+                <p>{location.address}</p>
+              </li>
+            ))}
+          </ul>
         }
-        <ul className="location__list">
-          {this.state.locations.length > 0 && this.state.locations.map((location, i) => (
-            <li
-              className="location__list-item"
-              style={{ backgroundColor: locationsMetaData.locations[i].color }}
-              key={generate()}
-            >
-              <p>{location.address}</p>
-            </li>
-          ))}
-        </ul>
         <div className="map__wrapper--outer">
           {this.state.mapCenterLoading && (
             <div className="map__loading">
@@ -207,8 +207,7 @@ class App extends Component {
           </div>
         </div>
         <ul>
-          {this.state.recommendations &&
-            this.state.recommendations.length > 0 &&
+          { this.state.recommendations.length > 0 &&
             this.state.recommendations.map(recommendation => (
               <li key={generate()}>
                 <p>{recommendation.title}</p>

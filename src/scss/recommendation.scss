@@ -1,0 +1,28 @@
+$dimensions: 20px;
+
+.recommendation {
+  margin-left: -$dimensions / 2;
+  margin-top: -$dimensions / 2;
+
+  &__marker {
+    background: white;
+    border-radius: 50%;
+    border: 2px darken($info, 5) solid;
+    width: $dimensions;
+    height: $dimensions;
+    transition: all ease 400ms;
+  }
+
+  &--hovered {
+    .recommendation__marker {
+      width: $dimensions * 1.5;
+      height: $dimensions * 1.5;
+    }
+  }
+
+  &__hover-box {
+    background: white;
+    z-index: 100;
+    position: relative;
+  }
+}
