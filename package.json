@@ -32,7 +32,7 @@
     "prestart": "npm run scss:build",
     "prebuild": "npm run scss:build"
   },
-  "proxy": "http://localhost:9000",
+  "proxy": "http://localhost:4000",
   "devDependencies": {
     "eslint": "^4.13.1",
     "eslint-config-airbnb": "^16.1.0",

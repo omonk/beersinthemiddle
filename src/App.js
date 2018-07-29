@@ -9,7 +9,7 @@ import locationsMetaData from './utils/locationPreSelect.json';
 const Form = ({
   submitForm, placesStyles, placesInputProps, handleSelect,
 }) => (
-  <form onSubmit={submitForm}>
+  <form className="column" onSubmit={submitForm}>
     <PlacesAutocomplete
       inputProps={placesInputProps}
       onSelect={handleSelect}
@@ -153,57 +153,64 @@ class App extends Component {
   render() {
     return (
       <div>
-        <div className="form">
-          <div>
-            <h2>{config.site_title}</h2>
-          </div>
-          <Form
-            submitForm={this.submitFrom}
-            handleSelect={this.handleSelect}
-            placesInputProps={{
-            value: this.state.inputValue,
-            onChange: this.onChange,
-          }}
-            placesStyles={{
-            root: {
-              zIndex: 100,
-            },
-          }}
-          />
-          {this.state.noLocationsError &&
-            <div>
-              <p>You need locations!</p>
-              <button onClick={this.hideNoLocationsError}>X</button>
+        <header className="header columns">
+          <h2 className="title column">{config.site_title}</h2>
+        </header>
+        <div className="ui-wrap">
+          <div className="search">
+            <div className="columns">
+              <div className="column is-one-third form">
+                <Form
+                  submitForm={this.submitFrom}
+                  handleSelect={this.handleSelect}
+                  placesInputProps={{
+                    value: this.state.inputValue,
+                    onChange: this.onChange,
+                  }}
+                  placesStyles={{
+                    root: {
+                    zIndex: 100,
+                    },
+                  }}
+                />
+                {this.state.noLocationsError &&
+                  <div>
+                    <p>You need locations!</p>
+                    <button onClick={this.hideNoLocationsError}>X</button>
+                  </div>
+                }
+              </div>
+              {this.state.locations.length > 0 &&
+              <ul className="location__list">
+                {this.state.locations.map((location, i) => (
+                  <li
+                    className="location__list-item"
+                    style={{ backgroundColor: locationsMetaData.locations[i].color }}
+                    key={generate()}
+                  >
+                    <p>{location.address}</p>
+                  </li>
+                ))}
+              </ul>
+            }
             </div>
-          }
-        </div>
-        {this.state.locations.length > 0 &&
-          <ul className="location__list">
-            {this.state.locations.map((location, i) => (
-              <li
-                className="location__list-item"
-                style={{ backgroundColor: locationsMetaData.locations[i].color }}
-                key={generate()}
-              >
-                <p>{location.address}</p>
-              </li>
-            ))}
-          </ul>
-        }
-        <div className="map__wrapper--outer">
-          {this.state.mapCenterLoading && (
+          </div>
+
+          <div className="map__wrapper--outer">
+            {this.state.mapCenterLoading && (
             <div className="map__loading">
               <p>Map center loading...</p>
             </div>
           )}
-          <div className="map__wrapper--inner">
-            <Map
-              zoom={10}
-              center={this.state.mapCenter}
-              locations={this.state.locations}
-              locationsMidPoint={this.state.locationsMidPoint}
-              recommendations={this.state.recommendations}
-            />
+            <div className="map__wrapper--inner">
+              <Map
+                zoom={10}
+                center={this.state.mapCenter}
+                locations={this.state.locations}
+                locationsMidPoint={this.state.locationsMidPoint}
+                recommendations={this.state.recommendations}
+              />
+            </div>
           </div>
         </div>
         <ul>
